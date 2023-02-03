@@ -38,7 +38,7 @@ const TREE_DATA: VehicleNode[] = [
         id: "qx50",
         name: "QX50",
         children: [
-          { name: "Pure AWD", id: 3 }, 
+          { name: "Pure AWD", id: 3 },
           { name: "Luxe", id: 4 }
         ]
       }
@@ -60,7 +60,7 @@ const TREE_DATA: VehicleNode[] = [
         id: "3series",
         name: "3 Series",
         children: [
-          { name: "Sedan", id: 7 }, 
+          { name: "Sedan", id: 7 },
           { name: "PHEV", id: 8 }
         ]
       }
@@ -76,143 +76,52 @@ const TREE_DATA: VehicleNode[] = [
 export class AppComponent {
   title = 'angular-tour-of-heroes';
 
-  public treeControl = new NestedTreeControl<VehicleNode>(node => node.children);
-public dataSource = new MatTreeNestedDataSource<VehicleNode>();
-@ViewChild('saveName', {static: true}) 
-public saveNameRef: ElementRef<HTMLInputElement>;
-public errMsg = '';
-public savedSelections: SavedSelection[] = [
-  {
-    name: "Infiniti Selections",
-    selections: [{
-      id: "infiniti",
-      children: [
-        {
-          id: "g50",
-          children: [ { id: 2 } ]
-        },
-        { id: "qx50" }
-      ]
-    }]
-  },
-  {
-    name: "Full Selection",
-    selections: [
-      { id: "infiniti" },
-      { id: "bmw" }
-    ]
-  },
-  {
-    name: "BMW Selections",
-    selections: [
-      {
-        id: "bmw",
-        children: [
-          {
-            id: "2series",
-            children: [
-              { id: 5 }
-            ]
-          },
-          {
-            id: "3series",
-            children: [
-              { id: 8 }
-            ]
-          }
-        ]
-      }
-    ]
-  }
-];
+   treeControl = new NestedTreeControl<VehicleNode>(node => node.children);
+   dataSource = new MatTreeNestedDataSource<VehicleNode>();
+   saveNameRef: ElementRef<HTMLInputElement>;
+   errMsg = '';
 
-constructor(private sanitizer: DomSanitizer) {
-  this.dataSource.data = TREE_DATA;
-  this.dataSource.data.forEach(node => {
-    this.setParent(node);
-  });
-}
-
-public hasChild = (_: number, node: VehicleNode) =>
-  !!node.children && node.children.length > 0;
-
-private setParent(node: VehicleNode, parent?: VehicleNode) {
-  node.parent = parent;
-  if (node.children) {
-    node.children.forEach(childNode => {
-      this.setParent(childNode, node);
+  constructor(private sanitizer: DomSanitizer) {
+    this.dataSource.data = TREE_DATA;
+    this.dataSource.data.forEach(node => {
+      this.setParent(node);
     });
   }
-}
 
-private checkAllParents(node: VehicleNode) {
-  if (node.parent) {
-    const descendants = this.treeControl.getDescendants(node.parent);
-    node.parent.selected = 
-      descendants.every(child => child.selected);
-    node.parent.indeterminate = 
-      descendants.some(child => child.selected);
-    this.checkAllParents(node.parent);
-  }
-}
+   hasChild = (_: number, node: VehicleNode) =>
+    !!node.children && node.children.length > 0;
 
- itemToggle(checked: boolean, node: VehicleNode) {
-  node.selected = checked;
-  if (node.children) {
-    node.children.forEach(child => {
-      this.itemToggle(checked, child);
-    });
-  }
-  this.checkAllParents(node);
-}
-
-public save() {
-  this.errMsg = '';
-  const saveName = this.saveNameRef.nativeElement.value.trim();
-  if (saveName === '') {
-    this.errMsg = 'Please provide a save name.';
-    this.saveNameRef.nativeElement.focus();
-  } else {
-    this.savedSelections.push({
-      name: this.sanitizer.sanitize(SecurityContext.HTML, saveName) as string,
-      selections: this.saveSelectedNodes(this.dataSource.data)
-    });
-  }
-}
-
-public loadSelection(index: number) {
-  alert("Tune in next week for this feature!");
-}
-
-private saveSelectedNodes(vehicleNodes: VehicleNode[]): VehicleSelection[] {
-  let vehicleSelections = [] as VehicleSelection[];
-
-  vehicleNodes.forEach(node => {
-    if (node.selected || node.indeterminate) { 
-      const vehicleSelection: VehicleSelection = { id: node.id };
-      if (node.children) {
-        vehicleSelection.children = this.saveSelectedNodes(node.children);
-      }
-      console.log(vehicleSelection)
-      vehicleSelections.push(vehicleSelection);
+   setParent(node: VehicleNode, parent?: VehicleNode) {
+    node.parent = parent;
+    if (node.children) {
+      node.children.forEach(childNode => {
+        this.setParent(childNode, node);
+      });
     }
-  });
-  return vehicleSelections;
-}
+  }
 
-private toggleSelectedNodes(
-  vehicleSelections: VehicleSelection[],
-  vehicleNodes: VehicleNode[]
-) {
-  vehicleSelections.forEach(selection => {
-    const vehicleNode = vehicleNodes.find(
-      vehicleNode => vehicleNode.id === selection.id
-    );
+
+  itemToggle(checked: boolean, node: VehicleNode) {
+    node.selected = checked;
+    if (node.children) {
+      node.children.forEach(child => {
+        this.itemToggle(checked, child);
+      });
+    }
+  }
+   toggleSelectedNodes(
+    vehicleSelections: VehicleSelection[],
+    vehicleNodes: VehicleNode[]
+  ) {
+    vehicleSelections.forEach(selection => {
+      const vehicleNode = vehicleNodes.find(
+        vehicleNode => vehicleNode.id === selection.id
+      );
       if (vehicleNode) {
         if (selection.children) {
           if (vehicleNode.children) {
             this.toggleSelectedNodes(
-              selection.children, 
+              selection.children,
               vehicleNode.children
             );
           } else {
@@ -224,8 +133,6 @@ private toggleSelectedNodes(
       } else {
         console.warn(`Couldn't find vehicle node with id '${selection.id}'`)
       }
-  });
-}
-  
-  
+    });
+  }
 }

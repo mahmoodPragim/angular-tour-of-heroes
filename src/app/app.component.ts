@@ -1,7 +1,7 @@
 // tree.component.ts
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, Injectable, Input, OnInit } from '@angular/core';
-import { Observable, retry } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-tree',
@@ -44,10 +44,6 @@ interface recur{
 export class Services{
   constructor(private http: HttpClient){}
   getTree():Observable<recur[]>{
-   const headers = new HttpHeaders({
-    'Content-Type': 'application/json',
-          Accept: 'application/json',
-   });
     return this.http.get<recur[]>("https://localhost:7150/api/Weather/tree");
   }
 }

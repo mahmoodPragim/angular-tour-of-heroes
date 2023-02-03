@@ -1,5 +1,7 @@
 // tree.component.ts
-import { Component, Input } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Component, Injectable, Input, OnInit } from '@angular/core';
+import { Observable, retry } from 'rxjs';
 
 @Component({
   selector: 'app-tree',
@@ -18,14 +20,34 @@ export class TreeComponent {
 @Component({
   selector: 'app-root',
   template: `
-    <app-tree [nodes]="data"></app-tree>
+      <app-tree [nodes]="data"></app-tree>
   `
 })
-export class AppComponent {
-  data: recur[] = [{value: 'A',children: [{ value: 'B' },{ value: 'C', children: [{ value: 'D' }, { value: 'E' }] }]},{ value: 'F' }
-  ];
+export class AppComponent implements OnInit{
+  
+  constructor(public services:Services){}
+  ngOnInit(): void {
+    this.services.getTree().subscribe(x=>{
+      
+      this.data=x
+    })
+  }
+  data: recur[] ;
 }
 interface recur{
   value: string;
   children?:recur[]
+}
+@Injectable({
+  providedIn: 'root'
+}) 
+export class Services{
+  constructor(private http: HttpClient){}
+  getTree():Observable<recur[]>{
+   const headers = new HttpHeaders({
+    'Content-Type': 'application/json',
+          Accept: 'application/json',
+   });
+    return this.http.get<recur[]>("https://localhost:7150/api/Weather/tree");
+  }
 }
